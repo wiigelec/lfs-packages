@@ -34,7 +34,7 @@ if [[ ! -f $PACKAGE ]] ; then
 fi
 
 cd $BUILD_DIR
-find . -maxdepth 1 -mindepth 1 -type d | xargs sudo rm -rf
+find . -maxdepth 1 -mindepth 1 -type d | xargs  rm -rf
 
 case $PACKAGE in
   *.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tar.lzma)
@@ -79,7 +79,7 @@ cd       build
              --disable-fsck
 make
 #make -k check || true
-sudo -E sh -e << ROOT_EOF
+
 PATH=$PATH:/usr/sbin
 make -j1 install
 rm -fv /usr/lib/{libcom_err,libe2p,libext2fs,libss}.a
@@ -89,16 +89,16 @@ makeinfo -o      doc/com_err.info ../lib/et/com_err.texinfo
 install -v -m644 doc/com_err.info /usr/share/info
 install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
 
-for libdir in /lib /usr/lib \$(find /opt -name lib); do
-  find \$libdir -name \\*.la           \\
-             ! -path \\*ImageMagick\\* \\
+for libdir in /lib /usr/lib $(find /opt -name lib); do
+  find $libdir -name \*.la \
+             ! -path \*ImageMagick\* \
                -delete
 done
-ROOT_EOF
-sudo /sbin/ldconfig
+
+ /sbin/ldconfig
 
 
 cd $BUILD_DIR
-[[ -n "$JH_KEEP_FILES" ]] || sudo rm -rf $JH_UNPACKDIR unpacked
+[[ -n "$JH_KEEP_FILES" ]] ||  rm -rf $JH_UNPACKDIR unpacked
 
 exit

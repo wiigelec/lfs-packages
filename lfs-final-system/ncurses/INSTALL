@@ -34,7 +34,7 @@ if [[ ! -f $PACKAGE ]] ; then
 fi
 
 cd $BUILD_DIR
-find . -maxdepth 1 -mindepth 1 -type d | xargs sudo rm -rf
+find . -maxdepth 1 -mindepth 1 -type d | xargs  rm -rf
 
 case $PACKAGE in
   *.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tar.lzma)
@@ -78,7 +78,7 @@ cd $JH_UNPACKDIR
             --enable-widec          \
             --with-pkg-config-libdir=/usr/lib/pkgconfig
 make
-sudo -E sh -e << ROOT_EOF
+
 PATH=$PATH:/usr/sbin
 make -j1 DESTDIR=\$PWD/dest install
 install -vm755 dest/usr/lib/libncursesw.so.6.4 /usr/lib
@@ -94,15 +94,15 @@ echo "INPUT(-lncursesw)" > /usr/lib/libcursesw.so
 ln -sfv libncurses.so      /usr/lib/libcurses.so
 cp -v -R doc -T /usr/share/doc/ncurses-6.4
 
-for libdir in /lib /usr/lib \$(find /opt -name lib); do
-  find \$libdir -name \\*.la           \\
-             ! -path \\*ImageMagick\\* \\
+for libdir in /lib /usr/lib $(find /opt -name lib); do
+  find $libdir -name \*.la \
+             ! -path \*ImageMagick\* \
                -delete
 done
-ROOT_EOF
-sudo /sbin/ldconfig
+
+ /sbin/ldconfig
 
 cd $BUILD_DIR
-[[ -n "$JH_KEEP_FILES" ]] || sudo rm -rf $JH_UNPACKDIR unpacked
+[[ -n "$JH_KEEP_FILES" ]] ||  rm -rf $JH_UNPACKDIR unpacked
 
 exit

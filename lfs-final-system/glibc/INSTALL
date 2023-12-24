@@ -34,7 +34,7 @@ if [[ ! -f $PACKAGE ]] ; then
 fi
 
 cd $BUILD_DIR
-find . -maxdepth 1 -mindepth 1 -type d | xargs sudo rm -rf
+find . -maxdepth 1 -mindepth 1 -type d | xargs  rm -rf
 
 case $PACKAGE in
   *.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tar.lzma)
@@ -81,7 +81,7 @@ echo "rootsbindir=/usr/sbin" > configparms
              libc_cv_slibdir=/usr/lib
 make
 #make -k check || true
-sudo -E sh -e << ROOT_EOF
+
 PATH=$PATH:/usr/sbin
 touch /etc/ld.so.conf
 sed '/test-installation/s@\$(PERL)@echo not running@' -i ../Makefile
@@ -92,16 +92,16 @@ mkdir -pv /var/cache/nscd
 install -v -Dm644 ../nscd/nscd.tmpfiles /usr/lib/tmpfiles.d/nscd.conf
 install -v -Dm644 ../nscd/nscd.service /usr/lib/systemd/system/nscd.service
 
-for libdir in /lib /usr/lib \$(find /opt -name lib); do
-  find \$libdir -name \\*.la           \\
-             ! -path \\*ImageMagick\\* \\
+for libdir in /lib /usr/lib $(find /opt -name lib); do
+  find $libdir -name \*.la \
+             ! -path \*ImageMagick\* \
                -delete
 done
-ROOT_EOF
-make localedata/install-locales
-sudo /sbin/ldconfig
 
-sudo -E sh -e << ROOT_EOF
+make localedata/install-locales
+ /sbin/ldconfig
+
+
 PATH=$PATH:/usr/sbin
 cat > /etc/nsswitch.conf << "EOF"
 # Begin /etc/nsswitch.conf
@@ -120,8 +120,8 @@ rpc: files
 
 # End /etc/nsswitch.conf
 EOF
-ROOT_EOF
-sudo -E sh -e << ROOT_EOF
+
+
 PATH=$PATH:/usr/sbin
 tar -xf ../../tzdata2023c.tar.gz
 
@@ -138,12 +138,12 @@ done
 cp -v zone.tab zone1970.tab iso3166.tab \$ZONEINFO
 zic -d \$ZONEINFO -p America/New_York
 unset ZONEINFO
-ROOT_EOF
-sudo -E sh -e << ROOT_EOF
+
+
 PATH=$PATH:/usr/sbin
 ln -sfv /usr/share/zoneinfo/**EDITME<xxx>EDITME** /etc/localtime
-ROOT_EOF
-sudo -E sh -e << ROOT_EOF
+
+
 PATH=$PATH:/usr/sbin
 cat > /etc/ld.so.conf << "EOF"
 # Begin /etc/ld.so.conf
@@ -151,9 +151,9 @@ cat > /etc/ld.so.conf << "EOF"
 /opt/lib
 
 EOF
-ROOT_EOF
+
 
 cd $BUILD_DIR
-[[ -n "$JH_KEEP_FILES" ]] || sudo rm -rf $JH_UNPACKDIR unpacked
+[[ -n "$JH_KEEP_FILES" ]] ||  rm -rf $JH_UNPACKDIR unpacked
 
 exit

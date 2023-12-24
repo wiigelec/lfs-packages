@@ -34,7 +34,7 @@ if [[ ! -f $PACKAGE ]] ; then
 fi
 
 cd $BUILD_DIR
-find . -maxdepth 1 -mindepth 1 -type d | xargs sudo rm -rf
+find . -maxdepth 1 -mindepth 1 -type d | xargs  rm -rf
 
 case $PACKAGE in
   *.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tar.lzma)
@@ -74,7 +74,7 @@ sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
 make -f Makefile-libbz2_so
 make clean
 make
-sudo -E sh -e << ROOT_EOF
+
 PATH=$PATH:/usr/sbin
 make -j1 PREFIX=/usr install
 cp -av libbz2.so.* /usr/lib
@@ -85,15 +85,15 @@ for i in /usr/bin/{bzcat,bunzip2}; do
 done
 rm -fv /usr/lib/libbz2.a
 
-for libdir in /lib /usr/lib \$(find /opt -name lib); do
-  find \$libdir -name \\*.la           \\
-             ! -path \\*ImageMagick\\* \\
+for libdir in /lib /usr/lib $(find /opt -name lib); do
+  find $libdir -name \*.la \
+             ! -path \*ImageMagick\* \
                -delete
 done
-ROOT_EOF
-sudo /sbin/ldconfig
+
+ /sbin/ldconfig
 
 cd $BUILD_DIR
-[[ -n "$JH_KEEP_FILES" ]] || sudo rm -rf $JH_UNPACKDIR unpacked
+[[ -n "$JH_KEEP_FILES" ]] ||  rm -rf $JH_UNPACKDIR unpacked
 
 exit

@@ -34,7 +34,7 @@ if [[ ! -f $PACKAGE ]] ; then
 fi
 
 cd $BUILD_DIR
-find . -maxdepth 1 -mindepth 1 -type d | xargs sudo rm -rf
+find . -maxdepth 1 -mindepth 1 -type d | xargs  rm -rf
 
 case $PACKAGE in
   *.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tar.lzma)
@@ -72,20 +72,20 @@ sed -i 's:\\\${:\\\$\\{:' intltool-update.in
 ./configure --prefix=/usr
 make
 #make -k check || true
-sudo -E sh -e << ROOT_EOF
+
 PATH=$PATH:/usr/sbin
 make -j1 install
 install -v -Dm644 doc/I18N-HOWTO /usr/share/doc/intltool-0.51.0/I18N-HOWTO
 
-for libdir in /lib /usr/lib \$(find /opt -name lib); do
-  find \$libdir -name \\*.la           \\
-             ! -path \\*ImageMagick\\* \\
+for libdir in /lib /usr/lib $(find /opt -name lib); do
+  find $libdir -name \*.la \
+             ! -path \*ImageMagick\* \
                -delete
 done
-ROOT_EOF
-sudo /sbin/ldconfig
+
+ /sbin/ldconfig
 
 cd $BUILD_DIR
-[[ -n "$JH_KEEP_FILES" ]] || sudo rm -rf $JH_UNPACKDIR unpacked
+[[ -n "$JH_KEEP_FILES" ]] ||  rm -rf $JH_UNPACKDIR unpacked
 
 exit

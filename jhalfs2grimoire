@@ -9,34 +9,45 @@ fi
 # iterate files in the directory
 for f in $1/*; do
 
-	# only process files
-	if [ -f $f ]; then
+    # only process files
+    if [ -f $f ]; then
 
-		# create package directory from jhalfs script name
-		d=${f/*-z-/}
-		mkdir -pv $d
+        # create package directory from jhalfs script name
+        d=${f/*-z-/}
+        mkdir -pv $d
 
-		# get DETAILS
-		echo "SPELL=$d" > $d/DETAILS
-		package=`grep PACKAGE\= $f`
-		package=${package/PACKAGE\=/}
+        ##############################################################
+        # DETAILS
+        echo "SPELL=$d" > $d/DETAILS
+        package=`grep PACKAGE\= $f`
+        package=${package/PACKAGE\=/}
     
-		version=${package##*-}
-		version=${version%.tar*}
+        version=${package##*-}
+        version=${version%.tar*}
     
-		echo VERSION=$version >> $d/DETAILS
-		echo "ENTERED=12222023" >> $d/DETAILS
+        echo VERSION=$version >> $d/DETAILS
+        echo "ENTERED=12222023" >> $d/DETAILS
     
-		# move the jhalfs script to the grimoire INSTALL file
-		mv $f $d/INSTALL
-		chmod u+x $d/INSTALL
+        ##############################################################
+        # INSTALL
+        mv $f $d/INSTALL
+        chmod u+x $d/INSTALL
+		
+        #remove sudo
+        sed -i 's/sudo//g' $d/INSTALL
+        sed -i 's/.*ROOT_EOF.*//g' $d/INSTALL
+        #fix static lib remove
+        sed -i 's/for libdir in \/lib \/usr\/lib \\$(find \/opt -name lib); do/for libdir in \/lib \/usr\/lib $(find \/opt -name lib); do/g' $d/INSTALL
+        sed -i 's/find \\$libdir -name \\\\\*\.la.*\\\\/find $libdir -name \\*.la \\/g' $d/INSTALL
+        sed -i 's/! -path \\\\\*ImageMagick\\\\\*.*\\\\/! -path \\\*ImageMagick\\\* \\/g' $d/INSTALL
 
-		# create stub BUILD file
-		echo "true" > $d/BUILD
-		chmod u+x $d/BUILD
+
+        ##############################################################
+        # BUILD PRE_BUILD
+        echo "true" > $d/BUILD
+        chmod u+x $d/BUILD
     
-		# create stub PRE_BUILD file
-		echo "true" > $d/PRE_BUILD
-		chmod u+x $d/PRE_BUILD
-	fi
+	echo "true" > $d/PRE_BUILD
+        chmod u+x $d/PRE_BUILD
+    fi
 done

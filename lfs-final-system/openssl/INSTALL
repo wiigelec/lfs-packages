@@ -34,7 +34,7 @@ if [[ ! -f $PACKAGE ]] ; then
 fi
 
 cd $BUILD_DIR
-find . -maxdepth 1 -mindepth 1 -type d | xargs sudo rm -rf
+find . -maxdepth 1 -mindepth 1 -type d | xargs  rm -rf
 
 case $PACKAGE in
   *.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tar.lzma)
@@ -75,22 +75,22 @@ cd $JH_UNPACKDIR
          zlib-dynamic
 make
 #make -k test || true
-sudo -E sh -e << ROOT_EOF
+
 PATH=$PATH:/usr/sbin
 sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
 make -j1 MANSUFFIX=ssl install
 mv -v /usr/share/doc/openssl /usr/share/doc/openssl-3.1.2
 cp -vfr doc/* /usr/share/doc/openssl-3.1.2
 
-for libdir in /lib /usr/lib \$(find /opt -name lib); do
-  find \$libdir -name \\*.la           \\
-             ! -path \\*ImageMagick\\* \\
+for libdir in /lib /usr/lib $(find /opt -name lib); do
+  find $libdir -name \*.la \
+             ! -path \*ImageMagick\* \
                -delete
 done
-ROOT_EOF
-sudo /sbin/ldconfig
+
+ /sbin/ldconfig
 
 cd $BUILD_DIR
-[[ -n "$JH_KEEP_FILES" ]] || sudo rm -rf $JH_UNPACKDIR unpacked
+[[ -n "$JH_KEEP_FILES" ]] ||  rm -rf $JH_UNPACKDIR unpacked
 
 exit
