@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# must provide a directory
+if [ -z "$1" ]; then 
+    echo "no directory" 
+    exit 
+fi
+
+# iterate files in the directory
+for f in $1/*; do
+
+	# only process files
+	if [ -f $f ]; then
+
+		# create package directory from jhalfs script name
+		d=${f/*-z-/}
+		mkdir -pv $d
+
+		# get DETAILS
+		echo "SPELL=$d" > $d/DETAILS
+		package=`grep PACKAGE\= $f`
+		package=${package/PACKAGE\=/}
+    
+		version=${package##*-}
+		version=${version%.tar*}
+    
+		echo VERSION=$version >> $d/DETAILS
+		echo "ENTERED=12222023" >> $d/DETAILS
+    
+		# move the jhalfs script to the grimoire INSTALL file
+		mv $f $d/INSTALL
+		chmod u+x $d/INSTALL
+
+		# create stub BUILD file
+		echo "true" > $d/BUILD
+		chmod u+x $d/BUILD
+    
+		# create stub PRE_BUILD file
+		echo "true" > $d/PRE_BUILD
+		chmod u+x $d/PRE_BUILD
+	fi
+done
