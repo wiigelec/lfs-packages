@@ -23,69 +23,16 @@ BUILD_DIR=${JH_BUILD_ROOT}${JH_BUILD_SUBDIRS:+/${JH_PKG_DIR}}
 mkdir -p $SRC_DIR
 mkdir -p $BUILD_DIR
 
-cd $SRC_DIR
-PACKAGE=glibc-2.38.tar.xz
-if [[ ! -f $PACKAGE ]] ; then
-  if [ -f "$JH_SRC_ARCHIVE/$PACKAGE" ] ; then
-    cp "$JH_SRC_ARCHIVE/$PACKAGE" "$PACKAGE"
-  else
-    wget -T 30 -t 5 "https://ftp.gnu.org/gnu/glibc/glibc-2.38.tar.xz"
-  fi
-fi
+cd /sources/glibc/glibc-2.38/
+echo $PWD
+cd build
 
-cd $BUILD_DIR
-find . -maxdepth 1 -mindepth 1 -type d | xargs  rm -rf
-
-case $PACKAGE in
-  *.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tar.lzma)
-     tar -xvf $SRC_DIR/$PACKAGE > unpacked
-     JH_UNPACKDIR=`grep '[^./]\+' unpacked | head -n1 | sed 's@^\./@@;s@/.*@@'`
-     ;;
-  *.tar.lz)
-     bsdtar -xvf $SRC_DIR/$PACKAGE 2> unpacked
-     JH_UNPACKDIR=`head -n1 unpacked | cut  -d" " -f2 | sed 's@^\./@@;s@/.*@@'`
-     ;;
-  *.zip)
-     zipinfo -1 $SRC_DIR/$PACKAGE > unpacked
-     JH_UNPACKDIR="$(sed 's@/.*@@' unpacked | uniq )"
-     if test $(wc -w <<< $JH_UNPACKDIR) -eq 1; then
-       unzip $SRC_DIR/$PACKAGE
-     else
-       JH_UNPACKDIR=${PACKAGE%.zip}
-       unzip -d $JH_UNPACKDIR $SRC_DIR/$PACKAGE
-     fi
-     ;;
-  *)
-     JH_UNPACKDIR=$JH_PKG_DIR-build
-     mkdir $JH_UNPACKDIR
-     cp $SRC_DIR/$PACKAGE $JH_UNPACKDIR
-     ADDITIONAL="$(find . -mindepth 1 -maxdepth 1 -type l)"
-     if [ -n "$ADDITIONAL" ]; then
-         cp $ADDITIONAL $JH_UNPACKDIR
-     fi
-     ;;
-esac
-export JH_UNPACKDIR
-cd $JH_UNPACKDIR
-
-patch -Np1 -i ../glibc-2.38-fhs-1.patch
-patch -Np1 -i ../glibc-2.38-memalign_fix-1.patch
-mkdir -v build
-cd       build
-echo "rootsbindir=/usr/sbin" > configparms
-../configure --prefix=/usr                            \
-             --disable-werror                         \
-             --enable-kernel=4.14                     \
-             --enable-stack-protector=strong          \
-             --with-headers=/usr/include              \
-             libc_cv_slibdir=/usr/lib
-make
-#make -k check || true
-
-PATH=$PATH:/usr/sbin
 touch /etc/ld.so.conf
-sed '/test-installation/s@\$(PERL)@echo not running@' -i ../Makefile
+
+sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
+
 make -j1 install
+
 sed '/RTLDLIST=/s@/usr@@g' -i /usr/bin/ldd
 cp -v ../nscd/nscd.conf /etc/nscd.conf
 mkdir -pv /var/cache/nscd
@@ -123,12 +70,12 @@ EOF
 
 
 PATH=$PATH:/usr/sbin
-tar -xf ../../tzdata2023c.tar.gz
+tar -xf /sources/tzdata2023c.tar.gz
 
 ZONEINFO=/usr/share/zoneinfo
 mkdir -pv \$ZONEINFO/{posix,right}
 
-for tz in etcetera southamerica northamerica europe africa antarctica  \\
+for tz in etcetera southamerica northamerica europe africa antarctica  \
           asia australasia backward; do
     zic -L /dev/null   -d \$ZONEINFO       \${tz}
     zic -L /dev/null   -d \$ZONEINFO/posix \${tz}
@@ -141,7 +88,7 @@ unset ZONEINFO
 
 
 PATH=$PATH:/usr/sbin
-ln -sfv /usr/share/zoneinfo/**EDITME<xxx>EDITME** /etc/localtime
+ln -sfv /usr/share/zoneinfo/America/Denver /etc/localtime
 
 
 PATH=$PATH:/usr/sbin
@@ -156,4 +103,3 @@ EOF
 cd $BUILD_DIR
 [[ -n "$JH_KEEP_FILES" ]] ||  rm -rf $JH_UNPACKDIR unpacked
 
-exit
